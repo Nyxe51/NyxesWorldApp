@@ -1,107 +1,95 @@
-const fileInput = document.getElementById('file-input');
-const playlistEl = document.getElementById('playlist');
-const audioPlayer = document.getElementById('audio-player');
-const nowPlaying = document.getElementById('now-playing');
-const playPauseBtn = document.getElementById('play-pause');
-const prevBtn = document.getElementById('prev');
-const nextBtn = document.getElementById('next');
-const shuffleBtn = document.getElementById('shuffle');
-const clearBtn = document.getElementById('clear-playlist');
+const fileInput = document.getElementById("file-upload");
+const audioPlayer = document.getElementById("audio-player");
+const nowPlaying = document.getElementById("now-playing");
+const playlistEl = document.getElementById("playlist");
+const playPauseBtn = document.getElementById("play-pause");
+const nextBtn = document.getElementById("next");
+const prevBtn = document.getElementById("prev");
+const shuffleBtn = document.getElementById("shuffle");
+const clearBtn = document.getElementById("clear-playlist");
 
 let playlist = [];
-let currentIndex = -1;
-let isPlaying = false;
-let isShuffle = false;
+let currentIndex = 0;
+let isShuffling = false;
 
-fileInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files);
+// 📥 Ajout des fichiers
+fileInput.addEventListener("change", () => {
+  const files = Array.from(fileInput.files).filter(file => file.name.endsWith(".mp3"));
+
   files.forEach(file => {
     const url = URL.createObjectURL(file);
     playlist.push({ name: file.name, url });
   });
-  if (currentIndex === -1 && playlist.length > 0) {
-    currentIndex = 0;
-    loadTrack(currentIndex);
-  }
+
   renderPlaylist();
+  if (playlist.length === files.length) playTrack(0); // Première fois = jouer
 });
 
-clearBtn.addEventListener('click', () => {
-  playlist = [];
-  currentIndex = -1;
-  audioPlayer.pause();
-  audioPlayer.src = "";
-  nowPlaying.textContent = "Aucune musique chargée";
-  renderPlaylist();
-});
-
-function loadTrack(index) {
-  const track = playlist[index];
-  if (!track) return;
+// 🎧 Lire une musique
+function playTrack(index) {
+  currentIndex = index;
+  const track = playlist[currentIndex];
   audioPlayer.src = track.url;
-  nowPlaying.textContent = `En lecture : ${track.name}`;
-}
-
-function playTrack() {
-  if (currentIndex === -1) return;
   audioPlayer.play();
-  isPlaying = true;
-  playPauseBtn.textContent = "⏸️";
+  nowPlaying.textContent = "🎶 " + track.name;
+  highlightCurrent();
 }
 
-function pauseTrack() {
-  audioPlayer.pause();
-  isPlaying = false;
-  playPauseBtn.textContent = "▶️";
-}
-
-playPauseBtn.addEventListener('click', () => {
-  if (isPlaying) pauseTrack();
-  else playTrack();
-});
-
-prevBtn.addEventListener('click', () => {
-  if (playlist.length === 0) return;
-  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-  loadTrack(currentIndex);
-  playTrack();
-});
-
-nextBtn.addEventListener('click', () => {
-  if (playlist.length === 0) return;
-  currentIndex = (currentIndex + 1) % playlist.length;
-  loadTrack(currentIndex);
-  playTrack();
-});
-
-shuffleBtn.addEventListener('click', () => {
-  isShuffle = !isShuffle;
-  shuffleBtn.style.color = isShuffle ? "#ff3333" : "#b30000";
-});
-
-audioPlayer.addEventListener('ended', () => {
-  if (isShuffle) {
-    currentIndex = Math.floor(Math.random() * playlist.length);
+// ▶️⏸ Play / Pause
+playPauseBtn.addEventListener("click", () => {
+  if (audioPlayer.paused) {
+    audioPlayer.play();
   } else {
-    currentIndex = (currentIndex + 1) % playlist.length;
+    audioPlayer.pause();
   }
-  loadTrack(currentIndex);
-  playTrack();
 });
 
+// ⏭ Next
+nextBtn.addEventListener("click", () => {
+  currentIndex = isShuffling
+    ? Math.floor(Math.random() * playlist.length)
+    : (currentIndex + 1) % playlist.length;
+  playTrack(currentIndex);
+});
+
+// ⏮ Prev
+prevBtn.addEventListener("click", () => {
+  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+  playTrack(currentIndex);
+});
+
+// 🔀 Shuffle
+shuffleBtn.addEventListener("click", () => {
+  isShuffling = !isShuffling;
+  shuffleBtn.style.opacity = isShuffling ? "1" : "0.5";
+});
+
+// 🧼 Clear playlist
+clearBtn.addEventListener("click", () => {
+  playlist = [];
+  playlistEl.innerHTML = "";
+  nowPlaying.textContent = "Aucune musique chargée";
+  audioPlayer.pause();
+  audioPlayer.removeAttribute("src");
+});
+
+// 📜 Générer la liste
 function renderPlaylist() {
   playlistEl.innerHTML = "";
   playlist.forEach((track, index) => {
-    const li = document.createElement('li');
+    const li = document.createElement("li");
     li.textContent = track.name;
-    li.addEventListener('click', () => {
-      currentIndex = index;
-      loadTrack(index);
-      playTrack();
-    });
-    if (index === currentIndex) {
-      li.style.color = "#ff3333";
-    }
+    li.addEventListener("click", () => playTrack(index));
     playlistEl.appendChild(li);
+  });
+  highlightCurrent();
+}
+
+// 🌟 Marquer la musique en cours
+function highlightCurrent() {
+  const items = playlistEl.querySelectorAll("li");
+  items.forEach((li, i) => {
+    li.style.fontWeight = i === currentIndex ? "bold" : "normal";
+    li.style.color = i === currentIndex ? "#b3004b" : "#000";
   });
 }
