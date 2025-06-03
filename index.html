@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nyxe's World</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Nyxe's World 🎧</h1>
+  </header>
+  
+  <main>
+    <section id="upload-section">
+      <input type="file" id="file-input" multiple accept="audio/*" />
+      <button id="clear-playlist">Clear Playlist</button>
+    </section>
+    
+    <section id="player-section">
+      <div id="now-playing">Aucune musique chargée</div>
+      <audio id="audio-player" controls></audio>
+      <div id="controls">
+        <button id="prev">⏮️</button>
+        <button id="play-pause">▶️</button>
+        <button id="next">⏭️</button>
+        <button id="shuffle">🔀</button>
+      </div>
+    </section>
+    
+    <section id="playlist-section">
+      <ul id="playlist"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
