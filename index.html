@@ -3,36 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nyxe's World</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Nyxe's World 🎧</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #121212;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 15px;
+    }
+
+    header {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #1db954; /* vert Spotify */
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    main {
+      background: #181818;
+      border-radius: 12px;
+      padding: 25px 30px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    #now-playing {
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #1db954;
+      min-height: 1.6em;
+      user-select: none;
+    }
+
+    audio {
+      width: 100%;
+      outline: none;
+      border-radius: 8px;
+      background: #282828;
+      box-shadow: inset 0 0 10px #1db954;
+    }
+
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    #controls button {
+      background: #1db954;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      color: #121212;
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(29, 185, 84, 0.6);
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      user-select: none;
+    }
+
+    #controls button:hover {
+      background: #1ed760;
+      transform: scale(1.1);
+    }
+
+    #shuffle {
+      background: #282828;
+      color: #b3b3b3;
+      width: 40px;
+      height: 40px;
+      box-shadow: none;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    #shuffle.active {
+      color: #1db954;
+      background: #121212;
+      box-shadow: 0 0 12px #1db954;
+    }
+
+    #playlist {
+      list-style: none;
+      max-height: 280px;
+      overflow-y: auto;
+      border-top: 1px solid #282828;
+      padding-top: 10px;
+      user-select: none;
+    }
+
+    #playlist li {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #b3b3b3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #playlist li:hover {
+      background-color: #333333;
+      color: #fff;
+    }
+
+    #playlist li.playing {
+      background-color: #1db954;
+      color: #121212;
+      font-weight: 900;
+      box-shadow: 0 0 10px #1db954;
+    }
+
+    /* Scrollbar style */
+    #playlist::-webkit-scrollbar {
+      width: 8px;
+    }
+    #playlist::-webkit-scrollbar-thumb {
+      background-color: #1db954;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        max-width: 100%;
+      }
+
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      #controls button {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+      }
+
+      #playlist li {
+        font-size: 0.9rem;
+        padding: 10px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Nyxe's World 🎧</h1>
+    <h1>Nyxe's World</h1>
   </header>
-  
-  <main>
-    <section id="upload-section">
-      <input type="file" id="file-upload" accept=".mp3" multiple>
-      <button id="clear-playlist">Clear Playlist</button>
-    </section>
-    
-    <section id="player-section">
-      <div id="now-playing">Aucune musique chargée</div>
-      <audio id="audio-player" controls></audio>
-      <div id="controls">
-        <button id="prev">⏮️</button>
-        <button id="play-pause">▶️</button>
-        <button id="next">⏭️</button>
-        <button id="shuffle">🔀</button>
-      </div>
-    </section>
-    
-    <section id="playlist-section">
-      <ul id="playlist"></ul>
-    </section>
-  </main>
 
-  <script src="app.js"></script>
+  <main>
+    <div id="now-playing">Aucune musique chargée</div>
+    <audio id="audio-player" controls></audio>
+    <div id="controls">
+      <button id="prev" title="Précédent" aria-label="Précédent">⏮</button>
+      <button id="play-pause" title="Play / Pause" aria-label="Play / Pause">▶</button>
+      <button id="next" title="Suivant" aria-label="Suivant">⏭</button>
+      <button id="shuffle" title="Shuffle" aria-label="Shuffle">🔀</button>
+    </div>
+    <ul id="playlist"></ul>
+  </main>
 </body>
 </html>

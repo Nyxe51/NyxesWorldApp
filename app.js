@@ -1,95 +1,86 @@
-const fileInput = document.getElementById("file-upload");
-const audioPlayer = document.getElementById("audio-player");
-const nowPlaying = document.getElementById("now-playing");
-const playlistEl = document.getElementById("playlist");
-const playPauseBtn = document.getElementById("play-pause");
-const nextBtn = document.getElementById("next");
-const prevBtn = document.getElementById("prev");
-const shuffleBtn = document.getElementById("shuffle");
-const clearBtn = document.getElementById("clear-playlist");
+// Playlist par défaut avec tes musiques
+let playlist = [
+  { name: "QUE PASA", url: "musics/que_pasa.mp3" },
+  { name: "NUEKI, TOLCHONOV - LIKE THIS!", url: "musics/nueki_tolchonov_like_this.mp3" },
+  { name: "LOS VOLTAJE", url: "musics/los_voltaje.mp3" },
+  { name: "WHY ULTRAFUNK", url: "musics/why_ultrafunk.mp3" }
+];
 
-let playlist = [];
 let currentIndex = 0;
 let isShuffling = false;
 
-// 📥 Ajout des fichiers
-fileInput.addEventListener("change", () => {
-  const files = Array.from(fileInput.files).filter(file => file.name.endsWith(".mp3"));
+const audioPlayer = document.getElementById("audio-player");
+const playlistEl = document.getElementById("playlist");
+const nowPlayingEl = document.getElementById("now-playing");
+const playPauseBtn = document.getElementById("play-pause");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+const shuffleBtn = document.getElementById("shuffle");
 
-  files.forEach(file => {
-    const url = URL.createObjectURL(file);
-    playlist.push({ name: file.name, url });
-  });
-
-  renderPlaylist();
-  if (playlist.length === files.length) playTrack(0); // Première fois = jouer
-});
-
-// 🎧 Lire une musique
-function playTrack(index) {
-  currentIndex = index;
-  const track = playlist[currentIndex];
-  audioPlayer.src = track.url;
-  audioPlayer.play();
-  nowPlaying.textContent = "🎶 " + track.name;
-  highlightCurrent();
-}
-
-// ▶️⏸ Play / Pause
-playPauseBtn.addEventListener("click", () => {
-  if (audioPlayer.paused) {
-    audioPlayer.play();
-  } else {
-    audioPlayer.pause();
-  }
-});
-
-// ⏭ Next
-nextBtn.addEventListener("click", () => {
-  currentIndex = isShuffling
-    ? Math.floor(Math.random() * playlist.length)
-    : (currentIndex + 1) % playlist.length;
-  playTrack(currentIndex);
-});
-
-// ⏮ Prev
-prevBtn.addEventListener("click", () => {
-  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-  playTrack(currentIndex);
-});
-
-// 🔀 Shuffle
-shuffleBtn.addEventListener("click", () => {
-  isShuffling = !isShuffling;
-  shuffleBtn.style.opacity = isShuffling ? "1" : "0.5";
-});
-
-// 🧼 Clear playlist
-clearBtn.addEventListener("click", () => {
-  playlist = [];
-  playlistEl.innerHTML = "";
-  nowPlaying.textContent = "Aucune musique chargée";
-  audioPlayer.pause();
-  audioPlayer.removeAttribute("src");
-});
-
-// 📜 Générer la liste
 function renderPlaylist() {
   playlistEl.innerHTML = "";
   playlist.forEach((track, index) => {
     const li = document.createElement("li");
     li.textContent = track.name;
-    li.addEventListener("click", () => playTrack(index));
+    li.classList.toggle("playing", index === currentIndex);
+    li.addEventListener("click", () => {
+      playTrack(index);
+    });
     playlistEl.appendChild(li);
   });
-  highlightCurrent();
 }
 
-// 🌟 Marquer la musique en cours
-function highlightCurrent() {
-  const items = playlistEl.querySelectorAll("li");
-  items.forEach((li, i) => {
-    li.style.fontWeight = i === currentIndex ? "bold" : "normal";
-    li.style.color = i === currentIndex ? "#b3004b" : "#000";
-  });
+function playTrack(index) {
+  if (index < 0) index = playlist.length - 1;
+  if (index >= playlist.length) index = 0;
+  currentIndex = index;
+  audioPlayer.src = playlist[currentIndex].url;
+  audioPlayer.play();
+  nowPlayingEl.textContent = "En train de jouer : " + playlist[currentIndex].name;
+  renderPlaylist();
+  updatePlayPauseBtn();
 }
+
+function togglePlayPause() {
+  if (audioPlayer.paused) {
+    audioPlayer.play();
+  } else {
+    audioPlayer.pause();
+  }
+  updatePlayPauseBtn();
+}
+
+function updatePlayPauseBtn() {
+  playPauseBtn.textContent = audioPlayer.paused ? "▶️" : "⏸️";
+}
+
+function playNext() {
+  if (isShuffling) {
+    playTrack(Math.floor(Math.random() * playlist.length));
+  } else {
+    playTrack(currentIndex + 1);
+  }
+}
+
+function playPrev() {
+  if (isShuffling) {
+    playTrack(Math.floor(Math.random() * playlist.length));
+  } else {
+    playTrack(currentIndex - 1);
+  }
+}
+
+function toggleShuffle() {
+  isShuffling = !isShuffling;
+  shuffleBtn.style.color = isShuffling ? "red" : "black";
+}
+
+playPauseBtn.addEventListener("click", togglePlayPause);
+nextBtn.addEventListener("click", playNext);
+prevBtn.addEventListener("click", playPrev);
+shuffleBtn.addEventListener("click", toggleShuffle);
+
+audioPlayer.addEventListener("ended", playNext);
+
+renderPlaylist();
+playTrack(currentIndex);
